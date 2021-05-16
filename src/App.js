@@ -1,58 +1,57 @@
 import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
 import './App.css';
+import Books from './Components/books.js';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <span>
-          <span>What </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
-    </div>
-  );
+
+
+
+
+class App extends React.Component {
+
+  constructor(){
+    super();
+    this.state = {
+      books: [],
+      discounted: false,
+    };
+  }
+
+  
+
+  clickHandler() {
+    fetch('https://booklist.fgfdev.com.au/books')
+      .then(res => res.json())
+      .then((data) => {
+        this.setState({ books: data, discounted: false })
+      });
+  }
+  
+
+  applyDiscount () {
+    let booklist = (this.state.books);
+    booklist.forEach((book) => {
+      if (book.BookCategory === 'Crime'){
+        book.newprice = ((book.Cost*0.95).toFixed(2));       
+      } else {
+        book.newprice = (book.Cost);
+      }
+    });
+
+    console.log(this.state.books);
+    this.setState( {books:booklist, discounted: true} );
+  }
+
+
+  render (){
+    return (
+      <div className="card">
+              <Books books={this.state.books} discounted={this.state.discounted}/>
+              <button onClick={()=> this.clickHandler()}>Refresh booklist</button>
+              <button onClick={()=> this.applyDiscount()}>Apply discount</button>
+      </div>
+    );
+  }
 }
+
 
 export default App;
