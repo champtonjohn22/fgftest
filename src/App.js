@@ -13,9 +13,10 @@ class App extends React.Component {
     super();
     this.state = {
       books: [],
-      discounted: false,
+      discounted: null,
       badrequest: null,
-      initial: null,
+      initial: true,
+      nodiscount: true,
     };
   }
 
@@ -23,10 +24,10 @@ class App extends React.Component {
     fetch(url)   
       .then(res => res.json())
       .then((data) => {
-        this.setState({ books: data, discounted: false, badrequest: false })
+        this.setState({ books: data, discounted: false, badrequest: false, initial: false, nodiscount: false })
       })
       .catch(() => {
-        this.setState({ badrequest: true })
+        this.setState({ badrequest: true, initial: false, nodiscount: true})
       });
   }
 
@@ -39,17 +40,23 @@ class App extends React.Component {
         book.newprice = (book.Cost);
       }
     });
-    this.setState( {books:booklist, discounted: true} );
+    this.setState( {books:booklist, discounted: true, initial: false, nodiscount: false} );
   }
 
 
   render() {
+    const noDisc = this.state.nodiscount;
     return (
       <div className="card">
-              <Books books={this.state.books} discounted={this.state.discounted} badrequest={this.state.badrequest}/>
-              <center><button onClick={()=> this.clickHandler()}>Refresh booklist</button></center>
-              <center><button onClick={()=> this.applyDiscount()}>Apply discount</button></center>
+              <Books books={this.state.books} discounted={this.state.discounted} badrequest={this.state.badrequest} initial={this.state.initial}/>
               <Totals books={this.state.books} discounted={this.state.discounted} badrequest={this.state.badrequest}/>
+              <div className="container d-flex flex-row justify-content-center">
+                <button onClick={()=> this.clickHandler()}>Refresh booklist</button>
+                  {noDisc
+                      ? <div></div>
+                      : <button onClick={()=> this.applyDiscount()}>Apply discount</button>
+                  }
+              </div>          
       </div>
     );
   }
