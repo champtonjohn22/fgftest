@@ -1,10 +1,11 @@
 import React from 'react';
 import './App.css';
 import Books from './Components/books.js';
+import Totals from './Components/totals.js';
 
-
-
-
+const percentoff = 5;                                   //this is the discount amount in percentage
+const url = 'https://booklist.fgfdev.com.au/books';     //API endpoint
+const salecat = 'Crime';                                //the book category receiving the discount
 
 class App extends React.Component {
 
@@ -13,41 +14,42 @@ class App extends React.Component {
     this.state = {
       books: [],
       discounted: false,
+      badrequest: null,
+      initial: null,
     };
   }
 
-  
-
   clickHandler() {
-    fetch('https://booklist.fgfdev.com.au/books')
+    fetch(url)   
       .then(res => res.json())
       .then((data) => {
-        this.setState({ books: data, discounted: false })
+        this.setState({ books: data, discounted: false, badrequest: false })
+      })
+      .catch(() => {
+        this.setState({ badrequest: true })
       });
   }
-  
 
-  applyDiscount () {
+  applyDiscount() {
     let booklist = (this.state.books);
     booklist.forEach((book) => {
-      if (book.BookCategory === 'Crime'){
-        book.newprice = ((book.Cost*0.95).toFixed(2));       
+      if (book.BookCategory === salecat){
+        book.newprice = (book.Cost*((100-percentoff)/100));       
       } else {
         book.newprice = (book.Cost);
       }
     });
-
-    console.log(this.state.books);
     this.setState( {books:booklist, discounted: true} );
   }
 
 
-  render (){
+  render() {
     return (
       <div className="card">
-              <Books books={this.state.books} discounted={this.state.discounted}/>
-              <button onClick={()=> this.clickHandler()}>Refresh booklist</button>
-              <button onClick={()=> this.applyDiscount()}>Apply discount</button>
+              <Books books={this.state.books} discounted={this.state.discounted} badrequest={this.state.badrequest}/>
+              <center><button onClick={()=> this.clickHandler()}>Refresh booklist</button></center>
+              <center><button onClick={()=> this.applyDiscount()}>Apply discount</button></center>
+              <Totals books={this.state.books} discounted={this.state.discounted} badrequest={this.state.badrequest}/>
       </div>
     );
   }
